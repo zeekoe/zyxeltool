@@ -7,7 +7,7 @@ login={"Input_Account":"admin","Input_Passwd":"*****","currLang":"en","RememberP
 httpenable.url=https://192.168.1.2/cgi-bin/DAL?oid=nat
 httpenable.payload={"Enable":true,"Protocol":"TCP","Description":"***","Interface":"IP.Interface.7","ExternalPortStart":80,"ExternalPortEnd":80,"InternalPortStart":80,"InternalPortEnd":80,"InternalClient":"***","SetOriginatingIP":false,"OriginatingIpAddress":"","Index":5,"X_ZYXEL_AutoDetectWanStatus":false}
 httpdisable.url=https://192.168.1.2/cgi-bin/DAL?oid=nat
-httpdisable.url={"Enable":false,"Protocol":"TCP","Description":"***","Interface":"IP.Interface.7","ExternalPortStart":80,"ExternalPortEnd":80,"InternalPortStart":80,"InternalPortEnd":80,"InternalClient":"***","SetOriginatingIP":false,"OriginatingIpAddress":"","Index":5,"X_ZYXEL_AutoDetectWanStatus":false}
+httpdisable.payload={"Enable":false,"Protocol":"TCP","Description":"***","Interface":"IP.Interface.7","ExternalPortStart":80,"ExternalPortEnd":80,"InternalPortStart":80,"InternalPortEnd":80,"InternalClient":"***","SetOriginatingIP":false,"OriginatingIpAddress":"","Index":5,"X_ZYXEL_AutoDetectWanStatus":false}
 wifidisable2.url=https://192.168.1.2/cgi-bin/DAL?oid=wlan
 wifidisable2.payload={"Index":1,"wlEnable":false}
 wifidisable5.url=https://192.168.1.2/cgi-bin/DAL?oid=wlan
