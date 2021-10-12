@@ -4,14 +4,13 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 public class ZyxelTool {
 
@@ -41,10 +40,9 @@ public class ZyxelTool {
             throw new RuntimeException("error");
         }
     }
-    static String cookie = "";
-    static String sessionkey = "";
 
     public static void main(String[] args) throws IOException {
+        boolean verbose = Arrays.asList(args).contains("--verbose") || Arrays.asList(args).contains("-v");
         Properties properties = new Properties();
         try {
             properties.load(new FileInputStream("/etc/zyxel.properties"));
@@ -54,67 +52,24 @@ public class ZyxelTool {
 
         String loginString = (String) properties.get("login");
 
-        login(loginString);
+        final Zyxel zyxel = new Zyxel(verbose);
 
-        for (String arg : args) {
-            final String urlString = (String) properties.get(arg + ".url");
-            final String payLoad = (String) properties.get(arg + ".payload");
-            System.out.println(urlString + " => " + payLoad);
-            System.out.println(doAction(urlString, payLoad));
-        }
+        try {
+            zyxel.login(loginString);
 
-        System.out.println(doRequest("https://192.168.1.2/cgi-bin/UserLogout", "POST",""));
-    }
+            final List<String> commands = Arrays.stream(args).filter(a -> !a.contains("-")).collect(Collectors.toList());
 
-    private static String doAction(String urlString, String params) throws IOException {
-        return doRequest(urlString, "PUT", params);
-    }
-
-    private static void login(String loginString) throws IOException {
-        final String urlString = "https://192.168.1.2/UserLogin";
-        final String requestMethod = "POST";
-        doRequest(urlString, requestMethod, loginString);
-    }
-
-    private static String doRequest(String urlString, String requestMethod, String params) throws IOException {
-        if (!sessionkey.equals("")) {
-            if (urlString.contains("?")) {
-                urlString += "&";
-            } else {
-                urlString += "?";
+            for (String cmd : commands) {
+                final String urlString = (String) properties.get(cmd + ".url");
+                final String payLoad = (String) properties.get(cmd + ".payload");
+                if (verbose) System.out.println(urlString + " => " + payLoad);
+                zyxel.doAction(urlString, payLoad);
             }
-            urlString += "sessionkey=" + sessionkey;
-        }
-        URL url = new URL(urlString);
-        HttpsURLConnection yc = (HttpsURLConnection) url.openConnection();
-        yc.setRequestMethod(requestMethod);
-        yc.setRequestProperty("Content-Type", "application/json");
-        yc.setDoOutput(true);
-        if (!cookie.equals("")) {
-            yc.setRequestProperty("Cookie", cookie);
-        }
-        if (!params.equals("")) {
-            DataOutputStream wr = new DataOutputStream(yc.getOutputStream());
-            wr.writeBytes(params);
-            wr.flush();
-            wr.close();
-        }
 
-        if (yc.getHeaderFields().containsKey("Set-Cookie")) {
-            final String cookieSetter = yc.getHeaderField("Set-Cookie");
-            cookie = cookieSetter.replaceAll("(Session=.*?);.*", "$1");;
+            zyxel.logout();
+        } catch (ZyxelException e) {
+            e.printStackTrace();
+            System.exit(-1);
         }
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(
-                        yc.getInputStream()));
-        String inputLine;
-        inputLine = in.readLine();
-        in.close();
-
-        final String checkSessionKey = inputLine.replaceAll(".*?\"sessionkey\":(\\d*).*", "$1");
-        if (checkSessionKey.length() > 0 && checkSessionKey.length() < 12) {
-            sessionkey = checkSessionKey;
-        }
-        return inputLine;
     }
 }

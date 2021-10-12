@@ -20,6 +20,6 @@ wifienable5.payload={"Index":5,"wlEnable":true}
 
 You can get the login string as well as the httpdisable/httpenable strings from the developer console in for example Firefox.
 
-Usage example: `java -jar target/zyxeltool-1.0-SNAPSHOT-jar-with-dependencies.jar wifienable5 wifienable2`
+Usage example: `java -jar target/zyxeltool-1.0-SNAPSHOT-jar-with-dependencies.jar --verbose wifienable5 wifienable2`
 
 Todo: make the base URL configurable. And cleanup the code. :)
